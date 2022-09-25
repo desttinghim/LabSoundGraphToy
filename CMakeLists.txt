@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.11)
 project(LabSoundGraphToy VERSION 0.1.0 LANGUAGES C CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+include(GNUInstallDirs)
+include(CheckIncludeFile)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
 add_subdirectory(third/LabSound)
 
 if (WIN32)
@@ -167,9 +171,12 @@ elseif(WIN32)
         third/nativefiledialog/nfd_win.cpp third/nativefiledialog/nfd_common.c
         third/nativefiledialog/nfd_common.h)
 else()
+    find_package(PkgConfig REQUIRED)
+    find_package(GTK3 REQUIRED gtk+-3.0)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
     # nb: there is a zenity variant, but haven't had a call for it yet
     set(NFD third/nativefiledialog/include/nfd.h
-        third/nativefiledialog/nfd_gtk.cpp third/nativefiledialog/nfd_common.c
+        third/nativefiledialog/nfd_gtk.c third/nativefiledialog/nfd_common.c
         third/nativefiledialog/nfd_common.h)
 endif()
 
@@ -190,6 +197,10 @@ target_compile_definitions(LabSoundGraphToy PRIVATE
     ${PLATFORM_DEFS}
     SOKOL_WIN32_FORCE_MAIN
 )
+
+if (GTK3_FOUND)
+    target_include_directories(LabSoundGraphToy PUBLIC ${GTK3_INCLUDE_DIRS})
+endif ()
 
 target_include_directories(LabSoundGraphToy SYSTEM
     PRIVATE third/imgui
@@ -226,6 +237,13 @@ elseif (APPLE)
             "-framework QuartzCore"
             )
 #    endif()
+else()
+    set(PLATFORM_LIBS
+        ${GTK3_LIBRARIES}
+        "Xi"
+        "X11"
+        "Xcursor"
+        "GL")
 endif()
 
 target_link_libraries(LabSoundGraphToy

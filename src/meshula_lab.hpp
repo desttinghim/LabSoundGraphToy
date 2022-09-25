@@ -47,7 +47,7 @@
 #elif defined(ML_APPLE)
 # include <mach-o/dyld.h>
 #elif defined(ML_NIX)
-# include <uinstd.h>
+# include <unistd.h>
 #endif
 
 struct ml_String {};
@@ -175,7 +175,7 @@ ml_String* ml_application_executable_path()
     s->str = nullptr;
     s->len = 0;
     char buf[1024] = { 0 };
-    ssize_t buf_size = readlink("/proc/self/exe", buff, sizeof(buf));
+    ssize_t buf_size = readlink("/proc/self/exe", buf, sizeof(buf));
     if (!buf_size || buf_size == sizeof(buf))
         return (ml_String*) s; // return an empty string on failure, or unreasonably long path
 
